@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fraud Detection System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>Fraud Detection System</h1>
+
+        <p class="subtitle">
+            ML-powered transaction risk assessment
+        </p>
+
+        <form action="/predict" method="POST">
+
+            <!-- TRANSACTION INFORMATION -->
+
+            <h2>Transaction Information</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="step">Transaction Step</label>
+                    <input type="number"
+                           id="step"
+                           name="step"
+                           value="632"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Transaction Type</label>
+
+                    <select id="type" name="type" required>
+                        <option value="CASH_IN">CASH_IN</option>
+                        <option value="CASH_OUT">CASH_OUT</option>
+                        <option value="DEBIT">DEBIT</option>
+                        <option value="PAYMENT">PAYMENT</option>
+                        <option value="TRANSFER" selected>TRANSFER</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Transaction Amount</label>
+                    <input type="number"
+                           id="amount"
+                           name="amount"
+                           step="0.01"
+                           value="480404.03"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="oldbalanceOrg">Old Origin Balance</label>
+                    <input type="number"
+                           id="oldbalanceOrg"
+                           name="oldbalanceOrg"
+                           step="0.01"
+                           value="480404.03"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newbalanceOrig">New Origin Balance</label>
+                    <input type="number"
+                           id="newbalanceOrig"
+                           name="newbalanceOrig"
+                           step="0.01"
+                           value="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="oldbalanceDest">Old Destination Balance</label>
+                    <input type="number"
+                           id="oldbalanceDest"
+                           name="oldbalanceDest"
+                           step="0.01"
+                           value="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newbalanceDest">New Destination Balance</label>
+                    <input type="number"
+                           id="newbalanceDest"
+                           name="newbalanceDest"
+                           step="0.01"
+                           value="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="isFlaggedFraud">System Fraud Flag</label>
+
+                    <select id="isFlaggedFraud"
+                            name="isFlaggedFraud">
+
+                        <option value="0" selected>No</option>
+                        <option value="1">Yes</option>
+
+                    </select>
+                </div>
+
+            </div>
+
+
+            <!-- HISTORICAL BEHAVIOUR -->
+
+            <h2>Historical Behaviour</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="sender_past_transaction_count">
+                        Sender Past Transactions
+                    </label>
+
+                    <input type="number"
+                           id="sender_past_transaction_count"
+                           name="sender_past_transaction_count"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sender_past_total_amount">
+                        Sender Past Total Amount
+                    </label>
+
+                    <input type="number"
+                           id="sender_past_total_amount"
+                           name="sender_past_total_amount"
+                           step="0.01"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sender_past_avg_amount">
+                        Sender Past Average Amount
+                    </label>
+
+                    <input type="number"
+                           id="sender_past_avg_amount"
+                           name="sender_past_avg_amount"
+                           step="0.01"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sender_past_unique_receivers">
+                        Sender Unique Receivers
+                    </label>
+
+                    <input type="number"
+                           id="sender_past_unique_receivers"
+                           name="sender_past_unique_receivers"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="receiver_past_transaction_count">
+                        Receiver Past Transactions
+                    </label>
+
+                    <input type="number"
+                           id="receiver_past_transaction_count"
+                           name="receiver_past_transaction_count"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="receiver_past_total_amount">
+                        Receiver Past Total Amount
+                    </label>
+
+                    <input type="number"
+                           id="receiver_past_total_amount"
+                           name="receiver_past_total_amount"
+                           step="0.01"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="receiver_past_avg_amount">
+                        Receiver Past Average Amount
+                    </label>
+
+                    <input type="number"
+                           id="receiver_past_avg_amount"
+                           name="receiver_past_avg_amount"
+                           step="0.01"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="receiver_past_unique_senders">
+                        Receiver Unique Senders
+                    </label>
+
+                    <input type="number"
+                           id="receiver_past_unique_senders"
+                           name="receiver_past_unique_senders"
+                           value="0"
+                           min="0"
+                           required>
+                </div>
+
+            </div>
+
+
+            <button type="submit">
+                Analyze Transaction
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

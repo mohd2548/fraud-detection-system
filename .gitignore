@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+
+# Environment / Secrets
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large Dataset / Models
+*.csv
+*.parquet
+# Model artifacts are intentionally tracked
+
+# Logs / Temp
+*.log
+*.tmp
+
+# IDE
+.vscode/
+
+# Flask
+instance/

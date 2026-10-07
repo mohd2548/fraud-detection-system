@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fraud Detection Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        {% if prediction == 1 %}
+
+            <div class="result-header fraud">
+                <div class="result-icon">⚠</div>
+                <h1>Fraud Detected</h1>
+                <p>High-risk transaction identified by the ML model.</p>
+            </div>
+
+        {% else %}
+
+            <div class="result-header safe">
+                <div class="result-icon">✓</div>
+                <h1>Transaction Appears Legitimate</h1>
+                <p>No fraud pattern was detected by the ML model.</p>
+            </div>
+
+        {% endif %}
+
+
+        <!-- Risk Score -->
+
+        <div class="risk-section">
+
+            <div class="label">
+                Model Risk Score
+            </div>
+
+            <div class="risk-score">
+                {{ "%.2f"|format(risk_score * 100) }}%
+            </div>
+
+            <div class="risk-bar">
+                <div class="risk-fill"
+                     style="width: {{ risk_score * 100 }}%;">
+                </div>
+            </div>
+
+            <p class="shap-explanation">
+                The risk score is a machine-learning prioritization signal
+                and should not be treated as independent proof of fraud.
+            </p>
+
+        </div>
+
+
+        <!-- Transaction Information -->
+
+        <div class="info-grid">
+
+            <div class="info-box">
+                <div class="label">Prediction</div>
+
+                <div class="value">
+                    {% if prediction == 1 %}
+                        Fraud
+                    {% else %}
+                        Legitimate
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="info-box">
+                <div class="label">Transaction Type</div>
+                <div class="value">{{ transaction_type }}</div>
+            </div>
+
+
+            <div class="info-box">
+                <div class="label">Transaction Amount</div>
+
+                <div class="value">
+                    ₹{{ "{:,.2f}".format(amount) }}
+                </div>
+            </div>
+
+
+            <div class="info-box">
+                <div class="label">Transaction Step</div>
+                <div class="value">{{ step }}</div>
+            </div>
+
+        </div>
+
+
+        <!-- Model Information -->
+
+        <div class="model-info">
+
+            <h2>Model Information</h2>
+
+            <p>
+                <strong>Model:</strong>
+                {{ model_name }}
+            </p>
+
+            <p>
+                <strong>Features used:</strong>
+                {{ feature_count }}
+            </p>
+
+            <p>
+                <strong>Decision:</strong>
+                Machine-learning risk assessment
+            </p>
+
+        </div>
+
+
+        <!-- SHAP Risk Drivers -->
+
+        <div class="model-info">
+
+            <h2>Top Risk Drivers</h2>
+
+            <p>
+                These features had the strongest influence on the model's
+                prediction for this transaction.
+            </p>
+
+            {% for item in top_features %}
+
+                <div class="shap-item">
+
+                    <div>
+
+                        <div class="shap-feature">
+                            {{ item.label }}
+                        </div>
+
+                        <div class="shap-explanation">
+                            {{ item.explanation }}
+                        </div>
+
+                    </div>
+
+                    <div class="shap-value">
+                        {{ "%.4f"|format(item.shap_value) }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+            <p class="shap-explanation">
+                SHAP values explain model behaviour. They do not establish
+                that a transaction is fraudulent by themselves.
+            </p>
+
+        </div>
+
+
+        <!-- Transaction Evidence -->
+
+        <div class="model-info">
+
+            <h2>Transaction Evidence</h2>
+
+            <p>
+                Key behavioural and transaction-level signals available for
+                investigator review.
+            </p>
+
+            <div class="shap-item">
+                <div>
+                    <div class="shap-feature">
+                        Sender Balance Depleted
+                    </div>
+                    <div class="shap-explanation">
+                        The sender's balance was completely depleted after the transaction.
+                    </div>
+                </div>
+
+                <div class="shap-value">
+                    {% if transaction_evidence["sender_balance_depleted"] == 1 %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="shap-item">
+                <div>
+                    <div class="shap-feature">
+                        Amount-to-Origin Balance Ratio
+                    </div>
+                    <div class="shap-explanation">
+                        The transaction amount relative to the sender's opening balance.
+                    </div>
+                </div>
+
+                <div class="shap-value">
+                    {{ "%.2f"|format(transaction_evidence["amount_to_origin_ratio"]) }}
+                </div>
+            </div>
+
+
+            <div class="shap-item">
+                <div>
+                    <div class="shap-feature">
+                        Sender Transaction History
+                    </div>
+                    <div class="shap-explanation">
+                        Number of previously observed transactions for this sender.
+                    </div>
+                </div>
+
+                <div class="shap-value">
+                    {{ transaction_evidence["sender_past_transaction_count"] }}
+                </div>
+            </div>
+
+
+            <div class="shap-item">
+                <div>
+                    <div class="shap-feature">
+                        Receiver Transaction History
+                    </div>
+                    <div class="shap-explanation">
+                        Number of previously observed transactions for this receiver.
+                    </div>
+                </div>
+
+                <div class="shap-value">
+                    {{ transaction_evidence["receiver_past_transaction_count"] }}
+                </div>
+            </div>
+
+
+            <div class="shap-item">
+                <div>
+                    <div class="shap-feature">
+                        Destination Balance
+                    </div>
+                    <div class="shap-explanation">
+                        Destination account balance after the transaction.
+                    </div>
+                </div>
+
+                <div class="shap-value">
+                    ₹{{ "{:,.2f}".format(transaction_evidence["new_balance_destination"]) }}
+                </div>
+            </div>
+
+
+            <div class="shap-item">
+                <div>
+                    <div class="shap-feature">
+                        Transaction Timing
+                    </div>
+                    <div class="shap-explanation">
+                        Transaction occurred during the weekend.
+                    </div>
+                </div>
+
+                <div class="shap-value">
+                    {% if transaction_evidence["is_weekend"] == 1 %}
+                        Weekend
+                    {% else %}
+                        Weekday
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Investigation Evidence / RAG -->
+
+        <div class="model-info">
+
+            <h2>Investigation Evidence</h2>
+
+            <p>
+                Relevant investigation guidance retrieved from the
+                fraud investigation knowledge base.
+            </p>
+
+            {% for item in investigation_case["case"]["investigation_guidance"] %}
+
+                <div class="shap-item">
+
+                    <div>
+
+                        <div class="shap-feature">
+                            {{ item["topic"] }}
+                        </div>
+
+                        <div class="shap-explanation">
+                            {{ item["guidance"] }}
+                        </div>
+
+                    </div>
+
+                    <div class="shap-value">
+                        {{ item["id"] }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- Investigation Recommendation -->
+
+        <div class="model-info">
+
+            <h2>Investigation Recommendation</h2>
+
+            {% if prediction == 1 %}
+                <strong>Recommended Action:</strong>
+                Escalate the transaction for human investigation and review the
+                supporting behavioural and transaction evidence.
+
+                <p>
+                    The automated system supports investigation prioritization.
+                    The final decision should be made by a human investigator after
+                    reviewing the available evidence.
+                </p>
+            {% else %}
+                <strong>Recommended Action:</strong>
+                No immediate fraud escalation recommended based on the current
+                machine-learning assessment.
+
+                <p>
+                    The transaction appears low risk according to the model.
+                    Normal monitoring and applicable review procedures may still apply.
+                </p>
+            {% endif %}
+
+        </div>
+
+        <!-- Human Decision -->
+
+        <div class="model-info">
+
+            <h2>Human Investigator Decision</h2>
+
+            {% if investigation_case["case"]["human_decision"]["decision"] %}
+
+                <h3>Submitted Decision</h3>
+
+                <p>
+                    <strong>Decision:</strong>
+
+                    {% if investigation_case["case"]["human_decision"]["decision"] == "APPROVED" %}
+                        Approve / Legitimate
+
+                    {% elif investigation_case["case"]["human_decision"]["decision"] == "ESCALATED" %}
+                        Escalate / Suspicious
+
+                    {% elif investigation_case["case"]["human_decision"]["decision"] == "MORE_EVIDENCE" %}
+                        Request More Evidence
+
+                    {% else %}
+                        {{ investigation_case["case"]["human_decision"]["decision"] }}
+
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Investigator Notes:</strong>
+                    {{ investigation_case["case"]["human_decision"]["investigator_notes"] }}
+                </p>
+
+                <p class="shap-explanation">
+                    This decision was recorded after reviewing the model prediction,
+                    SHAP explanation, transaction evidence, and investigation guidance.
+                </p>
+
+            {% else %}
+
+                <form method="POST" action="/human-decision">
+
+                    <label for="decision">
+                        <strong>Investigation Decision</strong>
+                    </label>
+
+                    <select name="decision" id="decision" required>
+                        <option value="">Select decision</option>
+                        <option value="APPROVED">Approve / Legitimate</option>
+                        <option value="ESCALATED">Escalate / Suspicious</option>
+                        <option value="MORE_EVIDENCE">Request More Evidence</option>
+                    </select>
+
+                    <label for="investigator_notes">
+                        <strong>Investigator Notes</strong>
+                    </label>
+
+                    <textarea
+                        name="investigator_notes"
+                        id="investigator_notes"
+                        rows="4"
+                        placeholder="Enter investigation reasoning or additional observations..."
+                        required
+                    ></textarea>
+
+                    <button type="submit" class="back-button">
+                        Submit Investigation Decision
+                    </button>
+
+                </form>
+
+                <p class="shap-explanation">
+                    The final decision is made by a human investigator after
+                    reviewing the model prediction, SHAP explanation,
+                    transaction evidence, and investigation guidance.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+</div>
+
+</body>
+</html>
